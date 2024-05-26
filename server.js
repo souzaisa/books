@@ -2,6 +2,7 @@ import express from 'express';
 const app = express();
 
 import { searchBook, listBooks } from "./src/scripts/googleBookConsumer.js";
+import { fetchNytAllBestSellers } from "./src/scripts/newYorkTimesConsumer.js";
 import { sequelize } from "./src/config/db.config.js";
 
 app.use(express.urlencoded({ extended: true }));
@@ -26,10 +27,31 @@ app.get('/book', async (req, res) => {
     }
 });
 
+// Buscar todas as listas de Best Sellers da API do NYT
+app.get('/nyt-lists', async (req, res) => {
+    try {
+        const data = await fetchNytAllBestSellers();
+        res.send(data);
+    } catch (err) {
+        res.status(500).send('Erro: ' + err);
+    }
+});
+
+// Buscar um Best Seller específico da API do NYT
+app.get('/nyt-list/:listName', async (req, res) => {
+    const listName = req.params.listName;
+    try {
+        const data = await fetchNytAllBestSellers(listName);
+        res.send(data);
+    } catch (err) {
+        res.status(500).send('Erro: ' + err);
+    }
+});
+
 app.get('/database', async (req, res) => {
     try {
         await sequelize.authenticate();
-        sequelize.close()   //Utilzar somente depois de popular todo o banco
+        sequelize.close() // Utilzar somente depois de popular todo o banco
         res.send('Connection has been established successfully.');
     } catch (err) {
         res.status(500).send('Erro' + err);
