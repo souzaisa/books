@@ -9,59 +9,64 @@ app.use(express.urlencoded({ extended: true }));
 
 const port = 8080;
 
+// Rota para listar livros de vários assuntos
 app.get('/', async (req, res) => {
     try {
         const resposta = await listBooks();
-        res.send(resposta);
+        res.json(resposta);
     } catch (err) {
-        res.status(500).send('Erro' + err);
+        res.status(500).json({ error: 'Erro: ' + err });
     }
 });
 
+// Rota para buscar um livro específico por ISBN
 app.get('/book', async (req, res) => {
     try {
         const book = await searchBook("9781446484197");
-        res.send(book);
+        res.json(book); 
     } catch (err) {
-        res.status(500).send('Erro' + err);
+        res.status(500).json({ error: 'Erro: ' + err });
     }
 });
 
-// Buscar todas as listas de Best Sellers da API do NYT
+// Rota para testar a conexão com o banco de dados
+app.get('/database', async (req, res) => {
+    try {
+        await sequelize.authenticate();
+        sequelize.close();
+        res.json({ message: 'Connection has been established successfully.' });
+    } catch (err) {
+        res.status(500).json({ error: 'Erro: ' + err });
+    }
+});
+
+// Rota para buscar todas as listas de Best Sellers da API do NYT
 app.get('/nyt-lists', async (req, res) => {
     try {
         const data = await fetchNytAllBestSellers();
-        res.send(data);
+        res.json(data); 
     } catch (err) {
-        res.status(500).send('Erro: ' + err);
+        res.status(500).json({ error: 'Erro: ' + err });
     }
 });
 
-// Buscar um Best Seller específico da API do NYT
+// Rota para buscar uma lista de Best Sellers específica da API do NYT
 app.get('/nyt-list/:listName', async (req, res) => {
     const listName = req.params.listName;
     try {
         const data = await fetchNytAllBestSellers(listName);
-        res.send(data);
+        res.json(data); 
     } catch (err) {
-        res.status(500).send('Erro: ' + err);
+        res.status(500).json({ error: 'Erro: ' + err });
     }
 });
 
-app.get('/database', async (req, res) => {
-    try {
-        await sequelize.authenticate();
-        sequelize.close() // Utilzar somente depois de popular todo o banco
-        res.send('Connection has been established successfully.');
-    } catch (err) {
-        res.status(500).send('Erro' + err);
-    }
-});
-
+// Rota para tratar requisições não encontradas (404)
 app.get('*', (req, res) => {
-    res.send('Página não encontrada!');
+    res.status(404).json({ error: 'Página não encontrada!' });
 });
 
+// Inicialização do servidor
 app.listen(port, () => {
     console.log('Servidor na porta: localhost:' + port);
 });

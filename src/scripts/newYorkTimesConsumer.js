@@ -1,9 +1,8 @@
-
 import fetch from 'node-fetch';
 
 const nytBaseUrl = 'https://api.nytimes.com/svc/books/v3';
 
-// API Keys
+// API Key
 const nytApiKey = 'j7q5f0NhhO7eAVxTT2zC72zGlLwZN5Np';
 
 /**
@@ -18,20 +17,19 @@ export async function fetchNytAllBestSellers(listName = '') {
         try {
             const response = await fetch(url);
             const data = await response.json();
-            console.log(`New York Times Best Sellers Data for ${listName}:`, data);
             return data;
         } catch (error) {
             console.error(`Erro ao buscar best sellers no NYT para ${listName}:`, error);
+            throw error;
         }
     } else {
         try {
             const response = await fetch(url);
             const data = await response.json();
-            console.log('All New York Times Best Sellers Lists:', data);
             return data;
         } catch (error) {
             console.error('Erro ao buscar todas as listas de best sellers no NYT:', error);
+            throw error;
         }
     }
 }
-fetchNytAllBestSellers();
