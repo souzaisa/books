@@ -3,7 +3,6 @@ const app = express();
 
 import { searchBook, listBooks } from "./src/scripts/googleBookConsumer.js";
 import { fetchNytAllBestSellers } from "./src/scripts/newYorkTimesConsumer.js";
-import { sequelize } from "./src/config/db.config.js";
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -32,8 +31,6 @@ app.get('/book', async (req, res) => {
 // Rota para testar a conexão com o banco de dados
 app.get('/database', async (req, res) => {
     try {
-        await sequelize.authenticate();
-        sequelize.close();
         res.json({ message: 'Connection has been established successfully.' });
     } catch (err) {
         res.status(500).json({ error: 'Erro: ' + err });
