@@ -3,6 +3,7 @@ const app = express();
 
 import { searchBook, listBooks } from "./src/scripts/googleBookConsumer.js";
 import { fetchNytAllBestSellers } from "./src/scripts/newYorkTimesConsumer.js";
+import { getBooksByISBN } from "./src/scripts/utils.js";
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -52,6 +53,15 @@ app.get('/nyt-list/:listName', async (req, res) => {
     const listName = req.params.listName;
     try {
         const data = await fetchNytAllBestSellers(listName);
+        res.json(data); 
+    } catch (err) {
+        res.status(500).json({ error: 'Erro: ' + err });
+    }
+});
+
+app.get('/nyt-books', async (req, res) => {
+    try {
+        const data = await getBooksByISBN();
         res.json(data); 
     } catch (err) {
         res.status(500).json({ error: 'Erro: ' + err });
