@@ -2,7 +2,7 @@ import express from 'express';
 const app = express();
 
 import { searchBook, listBooks } from "./src/scripts/googleBookConsumer.js";
-import { fetchNytAllBestSellers } from "./src/scripts/newYorkTimesConsumer.js";
+import { fetchNytAllBestSellers, fetchAllIsbnsFromAllLists } from "./src/scripts/newYorkTimesConsumer.js";
 import { getBooksByISBN } from "./src/scripts/utils.js";
 
 app.use(express.urlencoded({ extended: true }));
@@ -54,6 +54,16 @@ app.get('/nyt-list/:listName', async (req, res) => {
     try {
         const data = await fetchNytAllBestSellers(listName);
         res.json(data); 
+    } catch (err) {
+        res.status(500).json({ error: 'Erro: ' + err });
+    }
+});
+
+// Rota para buscar todos os ISBNs-13 dos livros presentes nas listas de Best Seller da NYT
+app.get('/nyt-all-isbns', async (req, res) => {
+    try {
+        const isbns = await fetchAllIsbnsFromAllLists();
+        res.json(isbns);
     } catch (err) {
         res.status(500).json({ error: 'Erro: ' + err });
     }
