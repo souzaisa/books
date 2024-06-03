@@ -59,6 +59,7 @@ app.get('/nyt-list/:listName', async (req, res) => {
     }
 });
 
+// Rota para buscar detalhes dos livros pelos ISBNs do NYT na API do Google Books
 app.get('/nyt-books', async (req, res) => {
     try {
         const data = await getBooksByISBN();

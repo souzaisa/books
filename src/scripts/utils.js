@@ -1,5 +1,5 @@
-import { fetchNytAllBestSellers } from "./newYorkTimesConsumer.js";
-import { searchBook } from "./googleBookConsumer.js";
+import { fetchNytAllBestSellers, fetchAllIsbnsFromAllLists } from "./newYorkTimesConsumer.js";
+import { searchBook, getBooksDetailsFromGoogleBooks } from "./googleBookConsumer.js";
 
 export async function getAllBooksFromNYTLists() {
     try {
@@ -30,13 +30,16 @@ export async function getAllBooksFromNYTLists() {
     }
 }
 
+/**
+ * Função para obter todos os livros por ISBN
+ */
 export async function getBooksByISBN() {
-    const ISBNList = await getAllBooksFromNYTLists();
-
-    let books = await Promise.all(ISBNList.map(async isbn => {
-        console.log(isbn);
-            return await searchBook(isbn);
-        }));
-
-    return books;
+    try {
+        const isbns = await fetchAllIsbnsFromAllLists();
+        const booksDetails = await getBooksDetailsFromGoogleBooks(isbns);
+        return booksDetails;
+    } catch (error) {
+        console.error('Erro ao obter livros por ISBN:', error);
+        throw error;
+    }
 }

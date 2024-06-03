@@ -34,3 +34,20 @@ export async function listBooks() {
         return erro.toString();
     }
 }
+
+/**
+ * Função para buscar detalhes dos livros na API do Google Books para um array de ISBNs.
+ * @param {array} isbns - Array de ISBNs
+ */
+export async function getBooksDetailsFromGoogleBooks(isbns) {
+    try {
+        const booksDetails = await Promise.all(isbns.map(async isbn => {
+            const book = await searchBook(isbn);
+            return book;
+        }));
+        return booksDetails;
+    } catch (error) {
+        console.error('Erro ao buscar detalhes dos livros na API do Google Books:', error);
+        throw error;
+    }
+}
