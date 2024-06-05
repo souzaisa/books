@@ -1,5 +1,5 @@
-import { fetchNytAllBestSellers, fetchAllIsbnsFromAllLists } from "./newYorkTimesConsumer.js";
-import { searchBook, getBooksDetailsFromGoogleBooks } from "./googleBookConsumer.js";
+import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchReviewsByIsbns } from "./newYorkTimesConsumer.js";
+import { searchBook, getBooksDetailsFromGoogleBooks, fetchGoogleBookReviewsByIsbns } from "./googleBookConsumer.js";
 
 export async function getAllBooksFromNYTLists() {
     try {
@@ -35,7 +35,7 @@ export async function getAllBooksFromNYTLists() {
  */
 export async function getBooksByISBN() {
     try {
-        const isbns = await fetchAllIsbnsFromAllLists();
+        const isbns = await fetchAllIsbnsFromNytLists();
         const booksDetails = await getBooksDetailsFromGoogleBooks(isbns);
         return booksDetails;
     } catch (error) {
@@ -43,3 +43,42 @@ export async function getBooksByISBN() {
         throw error;
     }
 }
+
+async function getAllReviews() {
+    try {
+        const isbns = await fetchAllIsbnsFromNytLists();
+        const reviews = await fetchReviewsByIsbns(isbns);
+        console.log(reviews);
+    } catch (error) {
+        console.error('Erro ao obter reviews:', error);
+    }
+}
+
+getAllReviews();
+
+
+// async function testFetchReviews() {
+//     try {
+//         const testIsbns = ['9781250178633', '9780593422878', '9781635575583']; // Adicione mais ISBNs conforme necessário
+//         const reviews = await fetchReviewsByIsbns(testIsbns);
+//         console.log(JSON.stringify(reviews, null, 2)); // Exibir resultados formatados
+//     } catch (error) {
+//         console.error('Erro ao testar fetchReviewsByIsbns:', error);
+//     }
+// }
+
+// testFetchReviews();
+
+async function testFetchGoogleBookReviews() {
+    try {
+        // Primeiro, obtemos todos os ISBNs.
+        const isbns = await fetchAllIsbnsFromNytLists();
+        // Em seguida, buscamos as avaliações desses ISBNs na API do Google Books.
+        const reviews = await fetchGoogleBookReviewsByIsbns(isbns);
+        console.log(JSON.stringify(reviews, null, 2)); // Exibir resultados formatados
+    } catch (error) {
+        console.error('Erro ao testar fetchGoogleBookReviewsByIsbns:', error);
+    }
+}
+
+testFetchGoogleBookReviews();

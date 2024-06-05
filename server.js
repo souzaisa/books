@@ -1,8 +1,8 @@
 import express from 'express';
 const app = express();
 
-import { searchBook, listBooks } from "./src/scripts/googleBookConsumer.js";
-import { fetchNytAllBestSellers, fetchAllIsbnsFromAllLists } from "./src/scripts/newYorkTimesConsumer.js";
+import { searchBook, listBooks, fetchGoogleBookReviewsByIsbns } from "./src/scripts/googleBookConsumer.js";
+import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchReviewsByIsbns } from "./src/scripts/newYorkTimesConsumer.js";
 import { getBooksByISBN } from "./src/scripts/utils.js";
 
 app.use(express.urlencoded({ extended: true }));
@@ -62,8 +62,34 @@ app.get('/nyt-list/:listName', async (req, res) => {
 // Rota para buscar todos os ISBNs-13 dos livros presentes nas listas de Best Seller da NYT
 app.get('/nyt-all-isbns', async (req, res) => {
     try {
-        const isbns = await fetchAllIsbnsFromAllLists();
+        const isbns = await fetchAllIsbnsFromNytLists();
         res.json(isbns);
+    } catch (err) {
+        res.status(500).json({ error: 'Erro: ' + err });
+    }
+});
+
+// Rota para buscar todos os ISBNs-13 únicos dos livros presentes nas listas de Best Sellers da NYT e seus reviews
+app.get('/nyt-reviews', async (req, res) => {
+    try {
+        const isbns = await fetchAllIsbnsFromNytLists();
+        const reviews = await fetchReviewsByIsbns(isbns);
+        if (reviews.length > 0) {
+            res.json(reviews);
+        } else {
+            res.json({ message: "Nenhum review encontrado para os ISBNs fornecidos." });
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Erro: ' + err });
+    }
+});
+
+// Rota para buscar avaliações do Google Books para ISBNs de Best Sellers do NYT
+app.get('/google-book-reviews', async (req, res) => {
+    try {
+        const isbns = await fetchAllIsbnsFromNytLists();
+        const reviews = await fetchGoogleBookReviewsByIsbns(isbns);
+        res.json(reviews);
     } catch (err) {
         res.status(500).json({ error: 'Erro: ' + err });
     }

@@ -51,3 +51,47 @@ export async function getBooksDetailsFromGoogleBooks(isbns) {
         throw error;
     }
 }
+
+/**
+ * Busca avaliações na API do Google Books por ISBNs
+ * @param {array} isbns - Array de ISBNs
+ */
+export async function fetchGoogleBookReviewsByIsbns(isbns) {
+    try {
+        const reviews = [];
+        
+        for (const isbn of isbns) {
+            const url = `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    const bookData = data.items[0].volumeInfo;
+                    if (bookData && bookData.averageRating && bookData.ratingsCount) {
+                        reviews.push({
+                            isbn: isbn,
+                            title: bookData.title,
+                            authors: bookData.authors,
+                            averageRating: bookData.averageRating,
+                            ratingsCount: bookData.ratingsCount,
+                            reviews: bookData.description
+                        });
+                    } else {
+                        console.log(`Nenhuma avaliação encontrada para o ISBN: ${isbn}`);
+                    }
+                } else {
+                    console.log(`Nenhum livro encontrado para o ISBN: ${isbn}`);
+                }
+                
+            } catch (error) {
+                console.error(`Erro ao buscar avaliações para o ISBN ${isbn}:`, error);
+            }
+        }
+
+        return reviews;
+    } catch (error) {
+        console.error('Erro ao buscar avaliações:', error);
+        throw error;
+    }
+}
