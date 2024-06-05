@@ -6,3 +6,52 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model lista {
+  nome            String          @id @db.VarChar(255)
+  data_publicacao DateTime        @db.Date
+  data_avaliacao  DateTime?       @db.Date
+  livrosdalista   livrosdalista[]
+
+  @@index([nome], map: "idx_nome")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model livro {
+  isbn            String          @id @db.VarChar(13)
+  titulo          String          @db.VarChar(255)
+  autor           String          @db.VarChar(255)
+  categoria       String          @db.VarChar(255)
+  data_publicacao DateTime        @db.Date
+  descricao       String?
+  num_paginas     Int?
+  link_thumbnail  String?         @db.VarChar(255)
+  nota_media      Float?
+  livrosdalista   livrosdalista[]
+  review          review[]
+
+  @@index([autor], map: "idx_autor")
+  @@index([categoria, data_publicacao], map: "idx_categoria_data")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model livrosdalista {
+  lista_nome String @db.VarChar(255)
+  livro_isbn String @db.VarChar(13)
+  rank       Int?
+  lista      lista  @relation(fields: [lista_nome], references: [nome], onDelete: NoAction, onUpdate: NoAction)
+  livro      livro  @relation(fields: [livro_isbn], references: [isbn], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([lista_nome, livro_isbn])
+}
+
+model review {
+  autor           String   @db.VarChar(255)
+  livro_isbn      String   @db.VarChar(13)
+  data_publicacao DateTime @db.Date
+  sumario         String?
+  link_url_review String?  @db.VarChar(255)
+  livro           livro    @relation(fields: [livro_isbn], references: [isbn], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([autor, livro_isbn])
+}

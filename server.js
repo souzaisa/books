@@ -4,6 +4,7 @@ const app = express();
 import { searchBook, listBooks, fetchGoogleBookReviewsByIsbns } from "./src/scripts/googleBookConsumer.js";
 import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchReviewsByIsbns } from "./src/scripts/newYorkTimesConsumer.js";
 import { getBooksByISBN } from "./src/scripts/utils.js";
+import { bookInsertion } from "./src/scripts/databaseInsertions.js";
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -22,16 +23,17 @@ app.get('/', async (req, res) => {
 // Rota para buscar um livro específico por ISBN
 app.get('/book', async (req, res) => {
     try {
-        const book = await searchBook("9781446484197");
-        res.json(book); 
+        const book = await searchBook("9781446484198");
+        res.json(book);
     } catch (err) {
         res.status(500).json({ error: 'Erro: ' + err });
     }
 });
 
-// Rota para testar a conexão com o banco de dados
+// Rota para testar a conexão e população do banco
 app.get('/database', async (req, res) => {
     try {
+        bookInsertion();
         res.json({ message: 'Connection has been established successfully.' });
     } catch (err) {
         res.status(500).json({ error: 'Erro: ' + err });
@@ -42,7 +44,7 @@ app.get('/database', async (req, res) => {
 app.get('/nyt-lists', async (req, res) => {
     try {
         const data = await fetchNytAllBestSellers();
-        res.json(data); 
+        res.json(data);
     } catch (err) {
         res.status(500).json({ error: 'Erro: ' + err });
     }
@@ -53,7 +55,7 @@ app.get('/nyt-list/:listName', async (req, res) => {
     const listName = req.params.listName;
     try {
         const data = await fetchNytAllBestSellers(listName);
-        res.json(data); 
+        res.json(data);
     } catch (err) {
         res.status(500).json({ error: 'Erro: ' + err });
     }
@@ -95,11 +97,13 @@ app.get('/google-book-reviews', async (req, res) => {
     }
 });
 
-// Rota para buscar detalhes dos livros pelos ISBNs do NYT na API do Google Books
-app.get('/nyt-books', async (req, res) => {
+// Rota para montar o array de livros completo
+app.get('/get-all-books', async (req, res) => {
     try {
-        const data = await getBooksByISBN();
-        res.json(data); 
+        const randomBooks = await listBooks();
+        const booksByISBN = await getBooksByISBN(); // Está retornando um array vazio!!
+
+        res.json(booksByISBN);
     } catch (err) {
         res.status(500).json({ error: 'Erro: ' + err });
     }
