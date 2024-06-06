@@ -1,28 +1,31 @@
-import { PrismaClient } from '@prisma/client'
-import { searchBook } from "./googleBookConsumer.js";
+// import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
-export async function bookInsertion() {
-    // const book = await searchBook();
-    // const livro = await prisma.livro.create({
-    //     data: {
-    //         isbn: "9781446484197",
-    //         titulo: 'teste123',
-    //         autor: "shaolin matador",
-    //         categoria: "terror",
-    //         data_publicacao: (new Date("05 October 2011 14:48 UTC")).toISOString()
-    //     },
-    // })
-    // console.log("BOOK INSERTION: " + livro.toString());
+export async function bookInsertion(book, prisma) {
+    const bookInserted = await prisma.livro.create({
+        data: {
+            isbn: book.isbn,
+            titulo: book.titulo,
+            autor: book.autor,
+            categoria: book.categoria,
+            data_publicacao: book.data_publicacao,
+            descricao: book.descricao,
+            num_paginas: book.num_paginas,
+            link_thumbnail: book.link_thumbnail,
+            nota_media: book.nota_media
+            //Como tratar as listas do relacionamento?
+        },
+    })
+    console.log("BOOK INSERTION: " + bookInserted.toString());
 }
 
-bookInsertion()
-    .then(async () => {
-        await prisma.$disconnect()
-    })
-    .catch(async (e) => {
-        console.error(e)
-        await prisma.$disconnect()
-        process.exit(1)
-    })
+// bookInsertion()
+//     .then(async () => {
+//         await prisma.$disconnect()
+//     })
+//     .catch(async (e) => {
+//         console.error(e)
+//         await prisma.$disconnect()
+//         process.exit(1)
+//     })

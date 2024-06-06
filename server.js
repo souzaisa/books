@@ -1,10 +1,12 @@
 import express from 'express';
+import { PrismaClient } from '@prisma/client'
 const app = express();
 
 import { searchBook, listBooks, fetchGoogleBookReviewsByIsbns } from "./src/scripts/googleBookConsumer.js";
 import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchReviewsByIsbns } from "./src/scripts/newYorkTimesConsumer.js";
-import { getBooksByISBN } from "./src/scripts/utils.js";
+import { getBooksByISBN, arrayFormater, bookDataFormater } from "./src/scripts/utils.js";
 import { bookInsertion } from "./src/scripts/databaseInsertions.js";
+
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -30,15 +32,37 @@ app.get('/book', async (req, res) => {
     }
 });
 
-// Rota para testar a conexão e população do banco
-app.get('/database', async (req, res) => {
-    try {
-        bookInsertion();
-        res.json({ message: 'Connection has been established successfully.' });
-    } catch (err) {
-        res.status(500).json({ error: 'Erro: ' + err });
-    }
-});
+// // Rota para testar a conexão e população do banco com livros
+// app.get('/database-book', async (req, res) => {
+//     try {
+//         const books = await listBooks();
+//         const booksList = arrayFormater(books);
+//         const booksFormated = booksList.map(book => bookDataFormater(book));
+//         const prisma = new PrismaClient();
+//         booksFormated.forEach(book => {
+//             try {
+//                 if (book && typeof book === 'object' && book.hasOwnProperty('isbn')) {
+//                     if (book.isbn !== undefined && book.isbn !== "") {
+//                         console.log(book.isbn);
+//                         bookInsertion(book, prisma);
+//                     }
+//                 }
+//             } catch (erro) {
+//                 console.log(erro);
+//             }
+//         }).then(async () => {
+//             await prisma.$disconnect()
+//         })
+//             .catch(async (e) => {
+//                 console.error(e)
+//                 await prisma.$disconnect()
+//                 process.exit(1)
+//             });
+//         res.json(booksFormated);
+//     } catch (err) {
+//         res.status(500).json({ error: 'Erro: ' + err });
+//     }
+// });
 
 // Rota para buscar todas as listas de Best Sellers da API do NYT
 app.get('/nyt-lists', async (req, res) => {
