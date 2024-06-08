@@ -1,9 +1,11 @@
 import express from 'express';
 import { getBooksByISBN } from './controllers/bookController.js';
 import { searchBook, listBooks, fetchGoogleBookReviewsByIsbns } from './services/googleBookService.js';
-import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchReviewsByIsbns } from './services/newYorkTimesService.js';
-import { arrayFormater, bookDataFormater, listDataFormater } from './utils/dataFormatter.js';
-import { bookInsertion } from './repositories/databaseInsertions.js';
+import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchReviewsByIsbns, fetchBookByListName } from './services/newYorkTimesService.js';
+import { arrayFormater, listDataFormater } from './utils/dataFormatter.js';
+import { bookDataFormater } from './utils/googleBooksDataFormatter.js';
+import { bookInsertion, listInsertion } from './repositories/databaseInsertions.js';
+import { PrismaClient } from '@prisma/client'
 
 const router = express.Router();
 
@@ -135,30 +137,36 @@ router.post('/database-book', async (req, res) => {
   }
 });
 
+// Precisa de ajustes
+router.post("/create-lists", async (req, res) => {
+  const nytLists = await fetchNytAllBestSellers();
+  const lists = nytLists.results.filter(value => JSON.stringify(value) !== '{}')
+  const nytListsFormated = await Promise.all(lists.map(async list => {
+    const books = await fetchBookByListName(list.list_name_encoded)
+    if (books.length > 0) {
+      list.books = books
+    }
+    return listDataFormater(list)
+  }
+  ))
+
+  const prisma = new PrismaClient();
+
+  nytListsFormated.forEach(formatedList => {
+    try {
+      listInsertion(formatedList, prisma);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  await prisma.$disconnect();
+  res.json(nytListsFormated);
+});
+
 // Rota para tratar requisições não encontradas (404)
 router.get('*', (req, res) => {
   res.status(404).json({ error: 'Página não encontrada!' });
 });
-
-// Precisa de ajustes
-
-// router.post("/create-lists", async (req, res) => {
-//   const nytLists = await fetchNytAllBestSellers();
-//   console.log(nytLists);
-//   // trata as informações
-//   const listsFormated = nytLists.map(list => listDataFormater(list));
-//   const prisma = new PrismaClient();
-
-//   listsFormated.forEach(list => {
-//     try {
-//       listInsertion(list, prisma); // fazer o tratamento de erros
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   });
-
-//   await prisma.$disconnect();
-//   res.json(listsFormated);
-// });
 
 export default router;

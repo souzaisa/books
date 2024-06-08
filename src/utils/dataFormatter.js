@@ -1,29 +1,10 @@
-export function bookDataFormater(book) {
-  try {
-    let formatedBook = {
-      isbn: book.volumeInfo.industryIdentifiers[0].identifier,
-      titulo: book.volumeInfo.title,
-      autor: book.volumeInfo.authors.toString(),
-      categoria: book.volumeInfo.categories.toString(),
-      data_publicacao: dateFormater(book.volumeInfo.publishedDate),
-      descricao: book.volumeInfo.description || null,
-      num_paginas: book.volumeInfo.pageCount || null,
-      link_thumbnail: book.imageLinks ? book.imageLinks.thumbnail : null,
-      nota_media: book.averageRating ? parseFloat(book.averageRating) : null,
-    };
-    return formatedBook;
-  } catch (error) {
-    console.log("Erro de formatação do livro: " + error);
-  }
-}
-
 export function listDataFormater(list) {
   try {
     let formatedList = {
-      nome: list.title,
-      data_publicacao: dateFormater(list.publishDate),
-      data_avaliacao: dateFormater(list.rateDate),
-      livrosdalista: list.isbns
+      nome: list.list_name_encoded,
+      data_publicacao: dateFormater(list.newest_published_date),
+      frequencia_atualizacao: list.updated,
+      livrosdalista: list.books
     };
     return formatedList;
   } catch (error) {

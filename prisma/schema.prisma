@@ -8,10 +8,11 @@ datasource db {
 }
 
 model lista {
-  nome            String          @id @db.VarChar(255)
-  data_publicacao DateTime        @db.Date
-  data_avaliacao  DateTime?       @db.Date
-  livrosdalista   livrosdalista[]
+  nome                   String          @id @db.VarChar(255)
+  data_publicacao        DateTime        @db.Date
+  data_avaliacao         DateTime?       @db.Date
+  frequencia_atualizacao String          @db.VarChar(255)
+  livrosdalista          livrosdalista[]
 
   @@index([nome], map: "idx_nome")
 }

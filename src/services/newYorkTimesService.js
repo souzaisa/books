@@ -55,10 +55,16 @@ export async function fetchAllNytLists() {
 /**
  * Função para buscar todos os ISBNs-13 de todas as listas de Best Sellers da NYT sem duplicados.
  */
-export async function fetchAllIsbnsFromNytLists() {
+export async function fetchAllIsbnsFromNytLists(listName) {
   try {
-    const listData = await fetchAllNytLists();
-    const listNames = listData.map(list => list.list_name_encoded);
+    let listNames = []
+
+    if (listName) {
+      listNames = [listName]
+    } else {
+      const listData = await fetchAllNytLists();
+      listNames = listData.map(list => list.list_name_encoded);
+    }
 
     const allIsbns = new Set();
     for (const listName of listNames) {
@@ -74,6 +80,30 @@ export async function fetchAllIsbnsFromNytLists() {
       } catch (error) {
         console.error(`Erro ao buscar ISBNs para a lista ${listName}:`, error);
       }
+    }
+
+    return Array.from(allIsbns); // Converter Set para Array antes de retornar
+  } catch (error) {
+    console.error('Erro ao extrair ISBNs de todas as listas:', error);
+    throw error;
+  }
+}
+
+
+export async function fetchBookByListName(listName) {
+  try {
+    const allIsbns = new Set();
+    const url = `${nytBaseUrl}/lists/current/${listName}.json?api-key=${nytApiKey}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data && data.results && data.results.books) {
+        data.results.books.forEach(book => {
+          book.isbns.forEach(isbn => allIsbns.add({ isbn: isbn.isbn13, rank: book.rank })); // jogar para o data formater
+        });
+      }
+    } catch (error) {
+      console.error(`Erro ao buscar ISBNs para a lista ${listName}:`, error);
     }
 
     return Array.from(allIsbns); // Converter Set para Array antes de retornar
