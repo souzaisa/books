@@ -66,7 +66,7 @@ export async function fetchAllIsbnsFromNytLists(listName) {
       listNames = listData.map(list => list.list_name_encoded);
     }
 
-    const allIsbns = new Set();
+    const isbns = [];
     for (const listName of listNames) {
       const url = `${nytBaseUrl}/lists/current/${listName}.json?api-key=${nytApiKey}`;
       try {
@@ -74,7 +74,7 @@ export async function fetchAllIsbnsFromNytLists(listName) {
         const data = await response.json();
         if (data && data.results && data.results.books) {
           data.results.books.forEach(book => {
-            book.isbns.forEach(isbn => allIsbns.add(isbn.isbn13)); // jogar para o data formater
+            isbns.push(book.primary_isbn13); // jogar para o data formater
           });
         }
       } catch (error) {
@@ -82,7 +82,41 @@ export async function fetchAllIsbnsFromNytLists(listName) {
       }
     }
 
-    return Array.from(allIsbns); // Converter Set para Array antes de retornar
+    return isbns;
+  } catch (error) {
+    console.error('Erro ao extrair ISBNs de todas as listas:', error);
+    throw error;
+  }
+}
+
+export async function fetchAllFromNytLists(listName) {
+  try {
+    let listNames = []
+
+    if (listName) {
+      listNames = [listName]
+    } else {
+      const listData = await fetchAllNytLists();
+      listNames = listData.map(list => list.list_name_encoded);
+    }
+
+    const registros = [];
+    for (const listName of listNames) {
+      const url = `${nytBaseUrl}/lists/current/${listName}.json?api-key=${nytApiKey}`;
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data && data.results && data.results.books) {
+          data.results.books.forEach(book => {
+            registros.push({ livro_isbn: book.primary_isbn13, rank: book.rank, lista_nome: listName })
+          });
+        }
+      } catch (error) {
+        console.error(`Erro ao buscar ISBNs para a lista ${listName}:`, error);
+      }
+    }
+
+    return registros; // Converter Set para Array antes de retornar
   } catch (error) {
     console.error('Erro ao extrair ISBNs de todas as listas:', error);
     throw error;

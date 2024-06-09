@@ -19,14 +19,14 @@ model lista {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model livro {
-  isbn            String          @id @db.VarChar(13)
+  isbn            String          @id @db.VarChar(50)
   titulo          String          @db.VarChar(255)
-  autor           String          @db.VarChar(255)
+  autor           String
   categoria       String          @db.VarChar(255)
   data_publicacao DateTime        @db.Date
   descricao       String?
   num_paginas     Int?
-  link_thumbnail  String?         @db.VarChar(255)
+  link_thumbnail  String?
   nota_media      Float?
   livrosdalista   livrosdalista[]
   review          review[]

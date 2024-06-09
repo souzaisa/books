@@ -1,13 +1,15 @@
 import express from 'express';
 import { getBooksByISBN } from './controllers/bookController.js';
 import { searchBook, listBooks, fetchGoogleBookReviewsByIsbns } from './services/googleBookService.js';
-import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchReviewsByIsbns, fetchBookByListName } from './services/newYorkTimesService.js';
-import { arrayFormater, listDataFormater } from './utils/dataFormatter.js';
+import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchAllFromNytLists, fetchReviewsByIsbns, fetchBookByListName } from './services/newYorkTimesService.js';
+import { arrayFormater, arrayFormater2, listDataFormater, arrayVerifier, sumArrays } from './utils/dataFormatter.js';
+import { dataBooks } from './services/dataProcessingService.js';
 import { bookDataFormater } from './utils/googleBooksDataFormatter.js';
-import { bookInsertion, listInsertion } from './repositories/databaseInsertions.js';
+import { bookInsertion, listInsertion, booksOfListInsertion } from './repositories/databaseInsertions.js';
 import { PrismaClient } from '@prisma/client'
 
 const router = express.Router();
+let booksReview;
 
 /*-- Rotas que usam a API do Google Books --*/
 
@@ -24,8 +26,8 @@ router.get('/', async (req, res) => {
 // Rota para buscar um livro específico por ISBN
 router.get('/book', async (req, res) => {
   try {
-    const book = await searchBook("9781446484198");
-    res.json(book);
+    const dataBooks = await getBooksByISBN();
+    res.json(dataBooks);
   } catch (err) {
     res.status(500).json({ error: 'Erro: ' + err });
   }
@@ -98,6 +100,7 @@ router.get('/get-all-books', async (req, res) => {
   try {
     const randomBooks = await listBooks();
     const booksByISBN = await getBooksByISBN(); // Está retornando um array vazio!!
+    console.log(booksByISBN);
 
     res.json(booksByISBN);
   } catch (err) {
@@ -108,14 +111,14 @@ router.get('/get-all-books', async (req, res) => {
 // Rota para testar a conexão e população do banco com livros
 router.post('/database-book', async (req, res) => {
   try {
-    const books = await listBooks();
-    const booksList = arrayFormater(books);
-    const booksFormated = booksList.map(book => bookDataFormater(book));
+    const booksFormated = await dataBooks();
+    // booksFormated = arrayVerifier(booksFormated, 'isbn');
+    console.log('booksformated', booksFormated);
     const prisma = new PrismaClient();
     booksFormated.forEach(book => {
       try {
         if (book && typeof book === 'object' && book.hasOwnProperty('isbn')) {
-          if (book.isbn !== undefined && book.isbn !== "") {
+          if (book.isbn !== undefined && book.isbn !== "" && book.isbn.length == 13) {
             console.log(book.isbn);
             bookInsertion(book, prisma);
           }
@@ -137,6 +140,48 @@ router.post('/database-book', async (req, res) => {
   }
 });
 
+router.post("/books-list", async (req, res) => {
+  try {
+    const booksOfList = await fetchAllFromNytLists();
+    const prisma = new PrismaClient();
+    booksOfList.forEach(list => {
+      try {
+        booksOfListInsertion(list, prisma);
+      } catch (error) {
+        console.log(error);
+      }
+    }).then(async () => {
+      await prisma.$disconnect()
+    }).catch(async (e) => {
+      console.error(e)
+      await prisma.$disconnect()
+      process.exit(1)
+    });
+    res.json(booksOfList);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro: ' + error });
+  }
+});
+
+router.post("/create-reviews", async (req, res) => {
+  try {
+    const booksFormated = await dataBooks();
+    // const prisma = new PrismaClient();
+    const reviewsIsbns = booksFormated.map(book => {
+      if (book && book.isbn) {
+        return book.isbn;
+      }
+    })
+    const review = await fetchGoogleBookReviewsByIsbns(reviewsIsbns);
+    console.log("review>>>>>>>>>>>>>>>>>>>>", review);
+    res.json(review);
+  }
+  catch (error) {
+    res.status(500).json({ error: 'Erro: ' + error });
+  }
+});
+
+// Refatorar para criar somente listas
 // Precisa de ajustes
 router.post("/create-lists", async (req, res) => {
   const nytLists = await fetchNytAllBestSellers();

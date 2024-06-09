@@ -34,3 +34,42 @@ export function arrayFormater(array) {
   });
   return booksList;
 }
+
+
+export function arrayFormater2(array) {
+  let booksList = [];
+  array.forEach(element => {
+    if (element) {
+      if (element.items) {
+        element.items.forEach(book => {
+          if (book) booksList.push(book);
+        });
+      }
+    }
+  });
+  return booksList;
+}
+
+export function arrayVerifier(array, attribute) {
+  if (!Array.isArray(array)) {
+    throw new Error("Input must be an array");
+  }
+  if (!attribute) {
+    throw new Error("Attribute must be defined");
+  }
+
+  let reduced = [];
+  array.forEach((item) => {
+    if (item && item.hasOwnProperty(attribute)) {
+      let duplicated = reduced.findIndex(redItem => redItem[attribute] === item[attribute]) > -1;
+      if (!duplicated) {
+        reduced.push(item);
+      }
+    }
+  });
+  return reduced;
+}
+
+export function sumArrays(array1, array2) {
+  return [...array1, ...array2];
+}

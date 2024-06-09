@@ -33,8 +33,10 @@ export async function getAllBooksFromNYTLists(req, res) {
 export async function getBooksByISBN(req, res) {
   try {
     const isbns = await fetchAllIsbnsFromNytLists();
-    const booksDetails = await getBooksDetailsFromGoogleBooks(isbns);
-    res.json(booksDetails);
+    const booksDetails = await Promise.all(isbns.map(async isbn => {
+      return await searchBook(isbn);
+    }));
+    return booksDetails;
   } catch (error) {
     console.error('Erro ao obter livros por ISBN:', error);
     res.status(500).json({ error: error.toString() });

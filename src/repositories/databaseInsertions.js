@@ -81,8 +81,8 @@ export async function booksOfListInsertion(booksOfList, prisma) {
     // Insere os dados dos livros da lista no banco de dados
     const booksOfListInserted = await prisma.livrosdalista.create({
       data: {
-        livro_isbn: booksOfList.livro_isbn,
         lista_nome: booksOfList.lista_nome,
+        livro_isbn: booksOfList.livro_isbn,
         rank: booksOfList.rank
       },
     });
@@ -91,3 +91,14 @@ export async function booksOfListInsertion(booksOfList, prisma) {
     console.log("Erro na inserção dos livros da lista: " + error);
   }
 }
+
+// export async function booksOfListInsertion(booksOfList, prisma) {
+//   const booksOfListInserted = await prisma.livrosdalista.create({
+//     data: {
+//       livro: { connect: { isbn: booksOfList.livro_isbn } },
+//       lista: { connect: { nome: booksOfList.lista_nome } },
+//       rank: booksOfList.rank
+//     }
+//   })
+//   console.log("booksOfList INSERTION: " + booksOfListInserted.toString());
+// }
