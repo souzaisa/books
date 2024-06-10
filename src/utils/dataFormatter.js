@@ -3,7 +3,7 @@ export function listDataFormater(list) {
     let formatedList = {
       nome: list.list_name_encoded,
       data_publicacao: dateFormater(list.newest_published_date),
-      frequencia_atualizacao: list.updated,
+      frequencia: list.updated,
       livrosdalista: list.books
     };
     return formatedList;

@@ -8,35 +8,31 @@ datasource db {
 }
 
 model lista {
-  nome                   String          @id @db.VarChar(255)
-  data_publicacao        DateTime        @db.Date
-  data_avaliacao         DateTime?       @db.Date
-  frequencia_atualizacao String          @db.VarChar(255)
-  livrosdalista          livrosdalista[]
+  nome            String            @id @db.VarChar(255)
+  data_publicacao DateTime          @db.Date
+  frequencia      String?           @db.VarChar(255)
+  livros_da_lista livros_da_lista[]
 
   @@index([nome], map: "idx_nome")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model livro {
-  isbn            String          @id @db.VarChar(50)
-  titulo          String          @db.VarChar(255)
+  isbn            String            @id @db.VarChar(13)
+  titulo          String            @db.VarChar(255)
   autor           String
-  categoria       String          @db.VarChar(255)
-  data_publicacao DateTime        @db.Date
+  categoria       String            @db.VarChar(255)
+  data_publicacao DateTime          @db.Date
   descricao       String?
   num_paginas     Int?
-  link_thumbnail  String?
+  link_thumbnail  String?           @db.VarChar(255)
   nota_media      Float?
-  livrosdalista   livrosdalista[]
+  livros_da_lista livros_da_lista[]
   review          review[]
-
-  @@index([autor], map: "idx_autor")
-  @@index([categoria, data_publicacao], map: "idx_categoria_data")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model livrosdalista {
+model livros_da_lista {
   lista_nome String @db.VarChar(255)
   livro_isbn String @db.VarChar(13)
   rank       Int?
@@ -47,12 +43,13 @@ model livrosdalista {
 }
 
 model review {
-  autor           String   @db.VarChar(255)
-  livro_isbn      String   @db.VarChar(13)
-  data_publicacao DateTime @db.Date
+  livro_isbn      String    @db.VarChar(13)
+  autor           String    @db.VarChar(255)
+  data_publicacao DateTime? @db.Date
   sumario         String?
-  link_url_review String?  @db.VarChar(255)
-  livro           livro    @relation(fields: [livro_isbn], references: [isbn], onDelete: NoAction, onUpdate: NoAction)
+  link_url_review String?   @db.VarChar(255)
+  numero_review   Int?
+  livro           livro     @relation(fields: [livro_isbn], references: [isbn], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([autor, livro_isbn])
 }

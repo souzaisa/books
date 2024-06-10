@@ -34,7 +34,7 @@ export async function listInsertion(list, prisma) {
   const data = {
     nome: list.nome,
     data_publicacao: list.data_publicacao,
-    frequencia_atualizacao: list.frequencia_atualizacao,
+    frequencia: list.frequencia,
 
   }
   if (livrosDaLista.length > 0) {
@@ -79,7 +79,7 @@ export async function reviewInsertion(review, prisma) {
 export async function booksOfListInsertion(booksOfList, prisma) {
   try {
     // Insere os dados dos livros da lista no banco de dados
-    const booksOfListInserted = await prisma.livrosdalista.create({
+    const booksOfListInserted = await prisma.livros_da_lista.create({
       data: {
         lista_nome: booksOfList.lista_nome,
         livro_isbn: booksOfList.livro_isbn,
@@ -88,17 +88,6 @@ export async function booksOfListInsertion(booksOfList, prisma) {
     });
     console.log("BooksOfList INSERTION: " + booksOfListInserted.toString());
   } catch (error) {
-    console.log("Erro na inserção dos livros da lista: " + error);
+    console.log("Erro na inserção da lista de livros: " + error);
   }
 }
-
-// export async function booksOfListInsertion(booksOfList, prisma) {
-//   const booksOfListInserted = await prisma.livrosdalista.create({
-//     data: {
-//       livro: { connect: { isbn: booksOfList.livro_isbn } },
-//       lista: { connect: { nome: booksOfList.lista_nome } },
-//       rank: booksOfList.rank
-//     }
-//   })
-//   console.log("booksOfList INSERTION: " + booksOfListInserted.toString());
-// }

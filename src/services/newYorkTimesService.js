@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 const nytBaseUrl = 'https://api.nytimes.com/svc/books/v3';
-const nytApiKey = 'j7q5f0NhhO7eAVxTT2zC72zGlLwZN5Np';
+const nytApiKey = 'zJpY7PuzN2HHCxN8XKm99B3O6p8Ax1zM';
 
 /**
  * Função para buscar a lista de Best Sellers na API do NYT

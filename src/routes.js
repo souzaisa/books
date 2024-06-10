@@ -185,18 +185,11 @@ router.post("/create-reviews", async (req, res) => {
 // Precisa de ajustes
 router.post("/create-lists", async (req, res) => {
   const nytLists = await fetchNytAllBestSellers();
-  const lists = nytLists.results.filter(value => JSON.stringify(value) !== '{}')
+  const lists = nytLists.results.filter(value => JSON.stringify(value) !== '{}');
   const nytListsFormated = await Promise.all(lists.map(async list => {
-    const books = await fetchBookByListName(list.list_name_encoded)
-    if (books.length > 0) {
-      list.books = books
-    }
-    return listDataFormater(list)
-  }
-  ))
-
+    return listDataFormater(list);
+  }));
   const prisma = new PrismaClient();
-
   nytListsFormated.forEach(formatedList => {
     try {
       listInsertion(formatedList, prisma);
@@ -204,7 +197,6 @@ router.post("/create-lists", async (req, res) => {
       console.log(error);
     }
   });
-
   await prisma.$disconnect();
   res.json(nytListsFormated);
 });
