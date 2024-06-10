@@ -38,8 +38,8 @@ CREATE TABLE livros_da_lista (
     livro_isbn VARCHAR(13) NOT NULL,
     rank INT CHECK (rank BETWEEN 1 AND 15),
     PRIMARY KEY (lista_nome, livro_isbn),
-    FOREIGN KEY (lista_nome) REFERENCES Lista(nome),
-    FOREIGN KEY (livro_isbn) REFERENCES Livro(isbn)
+    FOREIGN KEY (lista_nome) REFERENCES lista(nome),
+    FOREIGN KEY (livro_isbn) REFERENCES livro(isbn)
 );
 
 -- #### Criação de índices #### --
@@ -49,9 +49,6 @@ CREATE INDEX idx_autor ON livro (autor);
 
 -- Cria o índice categoria/data
 CREATE INDEX idx_categoria_data ON livro (categoria, data_publicacao);
-
--- Cria o índice nome da lista
-CREATE INDEX idx_nome ON lista (nome);
 
 -- #### Criação dos usuários do banco #### --
 

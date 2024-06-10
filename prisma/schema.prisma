@@ -12,8 +12,6 @@ model lista {
   data_publicacao DateTime          @db.Date
   frequencia      String?           @db.VarChar(255)
   livros_da_lista livros_da_lista[]
-
-  @@index([nome], map: "idx_nome")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.

@@ -1,7 +1,7 @@
 import express from 'express';
 import { fetchGoogleBookReviewsByIsbns } from './services/googleBookService.js';
-import { fetchNytAllBestSellers, fetchAllFromNytLists} from './services/newYorkTimesService.js';
-import { listDataFormater} from './utils/dataFormatter.js';
+import { fetchNytAllBestSellers, fetchAllFromNytLists } from './services/newYorkTimesService.js';
+import { listDataFormater } from './utils/dataFormatter.js';
 import { dataBooks } from './services/dataProcessingService.js';
 import { bookInsertion, listInsertion, booksOfListInsertion } from './repositories/databaseInsertions.js';
 import { PrismaClient } from '@prisma/client'
@@ -44,9 +44,12 @@ router.post("/create-books-list", async (req, res) => {
   try {
     const booksOfList = await fetchAllFromNytLists();
     const prisma = new PrismaClient();
+    let contador = 0;
     booksOfList.forEach(list => {
       try {
         booksOfListInsertion(list, prisma);
+        contador +=1
+        console.log(contador)
       } catch (error) {
         console.log(error);
       }
