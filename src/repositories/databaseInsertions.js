@@ -57,19 +57,22 @@ export async function listInsertion(list, prisma) {
 
 // Função para inserir dados de avaliação no banco de dados
 export async function reviewInsertion(review, prisma) {
+  console.log("review insertion", review);
   try {
     // Insere os dados formatados da avaliação no banco de dados
     const reviewInserted = await prisma.review.create({
       data: {
-        isbn: review.isbn,
         autor: review.autor,
-        data_publicacao: review.data_publicacao,
         sumario: review.sumario,
         link_url_review: review.link_url_review,
-        numero_review: review.numero_review
+        livro: {
+          connect: {
+            isbn: review.isbn
+          }
+        }
       },
     });
-    console.log("REVIEW INSERTION: " + reviewInserted.toString());
+    // console.log("REVIEW INSERTION: " + reviewInserted.toString());
   } catch (error) {
     console.log("Erro na inserção da avaliação: " + error);
   }
@@ -91,14 +94,3 @@ export async function booksOfListInsertion(booksOfList, prisma) {
     console.log("Erro na inserção dos livros da lista: " + error);
   }
 }
-
-// export async function booksOfListInsertion(booksOfList, prisma) {
-//   const booksOfListInserted = await prisma.livrosdalista.create({
-//     data: {
-//       livro: { connect: { isbn: booksOfList.livro_isbn } },
-//       lista: { connect: { nome: booksOfList.lista_nome } },
-//       rank: booksOfList.rank
-//     }
-//   })
-//   console.log("booksOfList INSERTION: " + booksOfListInserted.toString());
-// }

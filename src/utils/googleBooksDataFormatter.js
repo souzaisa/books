@@ -26,7 +26,6 @@ export function googleReviewDataFormater(review) {
     let formatedReview = {
       isbn: review.isbn,
       autor: review.authors.toString(),
-      data_publicacao: null,
       link_url_review: null,
       numero_review: parseInt(review.ratingsCount) || null,
       sumario: review.reviews || null

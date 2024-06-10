@@ -4,8 +4,8 @@ import { searchBook, listBooks, fetchGoogleBookReviewsByIsbns } from './services
 import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchAllFromNytLists, fetchReviewsByIsbns, fetchBookByListName } from './services/newYorkTimesService.js';
 import { arrayFormater, arrayFormater2, listDataFormater, arrayVerifier, sumArrays } from './utils/dataFormatter.js';
 import { dataBooks } from './services/dataProcessingService.js';
-import { bookDataFormater } from './utils/googleBooksDataFormatter.js';
-import { bookInsertion, listInsertion, booksOfListInsertion } from './repositories/databaseInsertions.js';
+import { googleReviewDataFormater } from './utils/googleBooksDataFormatter.js';
+import { bookInsertion, listInsertion, booksOfListInsertion, reviewInsertion } from './repositories/databaseInsertions.js';
 import { PrismaClient } from '@prisma/client'
 
 const router = express.Router();
@@ -164,39 +164,46 @@ router.post("/books-list", async (req, res) => {
 });
 
 router.post("/create-reviews", async (req, res) => {
+  const prisma = new PrismaClient();
+
   try {
     const booksFormated = await dataBooks();
-    // const prisma = new PrismaClient();
+
     const reviewsIsbns = booksFormated.map(book => {
       if (book && book.isbn) {
         return book.isbn;
       }
+    });
+    const reviews = await fetchGoogleBookReviewsByIsbns(reviewsIsbns);
+    reviews.forEach(review => {
+      console.log(review);
+      let formatedReview = googleReviewDataFormater(review);
+      try {
+        reviewInsertion(formatedReview, prisma);
+      } catch (error) {
+        console.log(error);
+      }
     })
-    const review = await fetchGoogleBookReviewsByIsbns(reviewsIsbns);
-    console.log("review>>>>>>>>>>>>>>>>>>>>", review);
-    res.json(review);
-  }
-  catch (error) {
+
+    res.json({ message: 'Reviews inseridas com sucesso!' });
+
+  } catch (error) {
+    console.error('Erro ao processar e inserir revisões:', error);
     res.status(500).json({ error: 'Erro: ' + error });
+
+  } finally {
+    await prisma.$disconnect();
   }
 });
 
-// Refatorar para criar somente listas
-// Precisa de ajustes
+
 router.post("/create-lists", async (req, res) => {
   const nytLists = await fetchNytAllBestSellers();
-  const lists = nytLists.results.filter(value => JSON.stringify(value) !== '{}')
+  const lists = nytLists.results.filter(value => JSON.stringify(value) !== '{}');
   const nytListsFormated = await Promise.all(lists.map(async list => {
-    const books = await fetchBookByListName(list.list_name_encoded)
-    if (books.length > 0) {
-      list.books = books
-    }
-    return listDataFormater(list)
-  }
-  ))
-
+    return listDataFormater(list);
+  }));
   const prisma = new PrismaClient();
-
   nytListsFormated.forEach(formatedList => {
     try {
       listInsertion(formatedList, prisma);
@@ -204,7 +211,6 @@ router.post("/create-lists", async (req, res) => {
       console.log(error);
     }
   });
-
   await prisma.$disconnect();
   res.json(nytListsFormated);
 });

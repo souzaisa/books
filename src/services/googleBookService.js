@@ -3,12 +3,12 @@ import fetch from 'node-fetch';
 async function searchBooksBySubjects(subject) {
   let startIndex = 0;
   let books = [];
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 10; i++) {
     try {
       const response = await fetch('https://www.googleapis.com/books/v1/volumes?q=subject=' + subject + '&orderBy=relevance&printType=books&maxResults=40&startIndex=' + startIndex);
       const responseJSON = await response.json();
       books.push(responseJSON);
-      startIndex = 40;
+      startIndex += 40;
     } catch (erro) {
       return erro.toString();
     }
