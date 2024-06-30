@@ -6,11 +6,11 @@ import { arrayFormater, arrayFormater2, arrayVerifier, sumArrays } from '../util
 
 export async function dataBooks() {
   const books = await listBooks();
-  const booksByNYT = await getBooksByISBN(); // arrumar a função para vir somente o primary isbn13
-  const nytList = arrayFormater2(booksByNYT);
+  // const booksByNYT = await getBooksByISBN(); // arrumar a função para vir somente o primary isbn13
+  // const nytList = arrayFormater2(booksByNYT);
   const googleList = arrayFormater(books);
-  const booksList = nytList.concat(googleList);
-  const booksFormated = booksList.map(book => bookDataFormater(book));
+  // const booksList = nytList.concat(googleList);
+  const booksFormated = googleList.map(book => bookDataFormater(book));
   const booksVerifier = arrayVerifier(booksFormated, 'isbn');
 
   return booksVerifier;

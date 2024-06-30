@@ -20,9 +20,9 @@ export async function bookInsertion(book, prisma) {
 }
 
 export async function listInsertion(list, prisma) {
-  let livrosDaLista = []
-  if (list.livrosdalista !== undefined) {
-    livrosDaLista = list.livrosdalista.map(book => ({
+  let livros_da_lista = []
+  if (list.livros_da_lista !== undefined) {
+    livros_da_lista = list.livros_da_lista.map(book => ({
       rank: book.rank,
       livro: {
         connect: {
@@ -34,25 +34,22 @@ export async function listInsertion(list, prisma) {
   const data = {
     nome: list.nome,
     data_publicacao: list.data_publicacao,
-    frequencia_atualizacao: list.frequencia_atualizacao,
+    frequencia: list.frequencia,
 
   }
-  if (livrosDaLista.length > 0) {
-    data.livrosdalista = {
-      create: livrosDaLista
+  if (livros_da_lista.length > 0) {
+    data.livros_da_lista = {
+      create: livros_da_lista
     }
   }
 
-
   console.log("PRISMA INSERT  ", JSON.stringify({ data }))
   try {
-
     const listInserted = await prisma.lista.create({ data })
     // console.log("LIST INSERTION: " + listInserted.toString());
   } catch (e) {
     console.log("Error on listInsertion: ", String(e))
   }
-
 }
 
 // Função para inserir dados de avaliação no banco de dados
@@ -63,8 +60,9 @@ export async function reviewInsertion(review, prisma) {
     const reviewInserted = await prisma.review.create({
       data: {
         autor: review.autor,
+        titulo: review.titulo,
         sumario: review.sumario,
-        link_url_review: review.link_url_review,
+        // link_url_review: review.link_url_review,
         livro: {
           connect: {
             isbn: review.isbn
@@ -82,7 +80,7 @@ export async function reviewInsertion(review, prisma) {
 export async function booksOfListInsertion(booksOfList, prisma) {
   try {
     // Insere os dados dos livros da lista no banco de dados
-    const booksOfListInserted = await prisma.livrosdalista.create({
+    const booksOfListInserted = await prisma.livros_da_lista.create({
       data: {
         lista_nome: booksOfList.lista_nome,
         livro_isbn: booksOfList.livro_isbn,

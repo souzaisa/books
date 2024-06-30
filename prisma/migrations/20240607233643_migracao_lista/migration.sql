@@ -3,7 +3,7 @@ CREATE TABLE "lista" (
     "nome" VARCHAR(255) NOT NULL,
     "data_publicacao" DATE NOT NULL,
     "data_avaliacao" DATE,
-    "frequencia_atualizacao" VARCHAR(255) NOT NULL,
+    "frequencia" VARCHAR(255) NOT NULL,
 
     CONSTRAINT "lista_pkey" PRIMARY KEY ("nome")
 );
@@ -24,12 +24,12 @@ CREATE TABLE "livro" (
 );
 
 -- CreateTable
-CREATE TABLE "livrosdalista" (
+CREATE TABLE "livros_da_lista" (
     "lista_nome" VARCHAR(255) NOT NULL,
     "livro_isbn" VARCHAR(13) NOT NULL,
     "rank" INTEGER,
 
-    CONSTRAINT "livrosdalista_pkey" PRIMARY KEY ("lista_nome","livro_isbn")
+    CONSTRAINT "livros_da_lista_pkey" PRIMARY KEY ("lista_nome","livro_isbn")
 );
 
 -- CreateTable
@@ -53,10 +53,10 @@ CREATE INDEX "idx_autor" ON "livro"("autor");
 CREATE INDEX "idx_categoria_data" ON "livro"("categoria", "data_publicacao");
 
 -- AddForeignKey
-ALTER TABLE "livrosdalista" ADD CONSTRAINT "livrosdalista_lista_nome_fkey" FOREIGN KEY ("lista_nome") REFERENCES "lista"("nome") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "livros_da_lista" ADD CONSTRAINT "livros_da_lista_lista_nome_fkey" FOREIGN KEY ("lista_nome") REFERENCES "lista"("nome") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "livrosdalista" ADD CONSTRAINT "livrosdalista_livro_isbn_fkey" FOREIGN KEY ("livro_isbn") REFERENCES "livro"("isbn") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "livros_da_lista" ADD CONSTRAINT "livros_da_lista_livro_isbn_fkey" FOREIGN KEY ("livro_isbn") REFERENCES "livro"("isbn") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "review" ADD CONSTRAINT "review_livro_isbn_fkey" FOREIGN KEY ("livro_isbn") REFERENCES "livro"("isbn") ON DELETE NO ACTION ON UPDATE NO ACTION;

@@ -11,7 +11,7 @@ export function bookDataFormater(book) {
       descricao: book.volumeInfo.description.trim() || null,
       num_paginas: book.volumeInfo.pageCount || null,
       link_thumbnail: book.imageLinks ? book.imageLinks.thumbnail : null,
-      nota_media: book.averageRating ? parseFloat(book.averageRating) : null,
+      nota_media: book.volumeInfo.averageRating ? book.volumeInfo.averageRating : null,
     };
     return formatedBook;
   } catch (error) {
@@ -25,9 +25,10 @@ export function googleReviewDataFormater(review) {
     // Realiza a formatação dos dados da avaliação do Google Books
     let formatedReview = {
       isbn: review.isbn,
+      titulo: review.title,
       autor: review.authors.toString(),
-      link_url_review: null,
-      numero_review: parseInt(review.ratingsCount) || null,
+      // link_url_review: null,
+      // numero_review: parseInt(review.ratingsCount) || null,
       sumario: review.reviews || null
     };
     return formatedReview;
