@@ -1,10 +1,10 @@
 import express from 'express';
-import { fetchGoogleBookReviewsByIsbns, searchBook, fetchBestSellersHistory } from './services/googleBookService.js';
+import { fetchGoogleBookReviewsByIsbns } from './services/googleBookService.js';
 import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchAllFromNytLists } from './services/newYorkTimesService.js';
 import { listDataFormater } from './utils/dataFormatter.js';
 import { dataBooks, searchDataBooks } from './services/dataProcessingService.js';
 import { googleReviewDataFormater, bookDataFormater } from './utils/googleBooksDataFormatter.js';
-import { livrosDaListaDataFormater, formatBooksListBS } from './utils/newYorkTimesDataFormatter.js'
+import { livrosDaListaDataFormater } from './utils/newYorkTimesDataFormatter.js'
 import { bookExists, bookInsertion, listInsertion, booksOfListInsertion, booksOfListInsertionBS, reviewInsertion } from './repositories/databaseInsertions.js';
 import { PrismaClient } from '@prisma/client'
 
