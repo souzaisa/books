@@ -1,40 +1,34 @@
 import express from 'express';
-import { fetchGoogleBookReviewsByIsbns } from './services/googleBookService.js';
+import { fetchGoogleBookReviewsByIsbns, searchBook, fetchBestSellersHistory } from './services/googleBookService.js';
 import { fetchNytAllBestSellers, fetchAllIsbnsFromNytLists, fetchAllFromNytLists } from './services/newYorkTimesService.js';
 import { listDataFormater } from './utils/dataFormatter.js';
-import { dataBooks } from './services/dataProcessingService.js';
-import { googleReviewDataFormater } from './utils/googleBooksDataFormatter.js';
-import { bookInsertion, listInsertion, booksOfListInsertion, reviewInsertion } from './repositories/databaseInsertions.js';
+import { dataBooks, searchDataBooks } from './services/dataProcessingService.js';
+import { googleReviewDataFormater, bookDataFormater } from './utils/googleBooksDataFormatter.js';
+import { livrosDaListaDataFormater, formatBooksListBS } from './utils/newYorkTimesDataFormatter.js'
+import { bookExists, bookInsertion, listInsertion, booksOfListInsertion, booksOfListInsertionBS, reviewInsertion } from './repositories/databaseInsertions.js';
 import { PrismaClient } from '@prisma/client'
 
 const router = express.Router();
+const prisma = new PrismaClient();
 
 // Rota para testar a conexão e popular o banco com livros
 router.post('/create-book', async (req, res) => {
   try {
-    const booksFormated = await dataBooks();
+    let booksFormated = await dataBooks();
     // booksFormated = arrayVerifier(booksFormated, 'isbn');
-    console.log('booksformated', booksFormated);
-    const prisma = new PrismaClient();
-    booksFormated.forEach(book => {
+    await Promise.all(booksFormated.map(async book => {
       try {
         if (book && typeof book === 'object' && book.hasOwnProperty('isbn')) {
-          if (book.isbn !== undefined && book.isbn !== "" && book.isbn.length == 13) {
-            console.log(book.isbn);
-            bookInsertion(book, prisma);
+          if (book.isbn !== undefined && book.isbn !== "" && book.isbn.length === 13) {
+            await bookInsertion(book, prisma);  // Inserir livro
           }
         }
       } catch (erro) {
         console.log(erro);
       }
-    }).then(async () => {
-      await prisma.$disconnect()
-    })
-      .catch(async (e) => {
-        console.error(e)
-        await prisma.$disconnect()
-        process.exit(1)
-      });
+    }));
+
+    await prisma.$disconnect()
     res.json(booksFormated);
   } catch (err) {
     res.status(500).json({ error: 'Erro: ' + err });
@@ -61,26 +55,42 @@ router.post("/create-lists", async (req, res) => {
 });
 
 router.post("/create-books-list", async (req, res) => {
-  try {
-    const booksOfList = await fetchAllFromNytLists();
-    const prisma = new PrismaClient();
-    booksOfList.forEach(list => {
-      try {
-        booksOfListInsertion(list, prisma);
-      } catch (error) {
-        console.log(error);
+  const booksOfList = await fetchAllFromNytLists();
+  await Promise.all(booksOfList.map(async bookList => {
+    try {
+      if (!await bookExists(bookList.livro_isbn, prisma)) {
+        const book = await searchDataBooks(bookList.livro_isbn);
+        if (book) {
+          if (book.isbn !== undefined && book.isbn !== "" && book.isbn.length === 13) {
+            await bookInsertion(book, prisma);
+          }
+        }
+        if (await bookExists(bookList.livro_isbn, prisma)) {
+          booksOfList.forEach(booksList => {
+            try {
+              booksOfListInsertion(booksList, prisma);
+            } catch (error) {
+              console.log('Erro:', error);
+            }
+          });
+        }
+      } else {
+        booksOfList.forEach(booksList => {
+          try {
+            booksOfListInsertion(booksList, prisma);
+          } catch (error) {
+            console.log('Erro:', error);
+          }
+        });
       }
-    }).then(async () => {
-      await prisma.$disconnect()
-    }).catch(async (e) => {
-      console.error(e)
-      await prisma.$disconnect()
-      process.exit(1)
-    });
-    res.json(booksOfList);
-  } catch (error) {
-    res.status(500).json({ error: 'Erro: ' + error });
-  }
+    } catch (error) {
+      console.log("Erro ao inserir livro da lista");
+    }
+  }));
+
+
+  await prisma.$disconnect();
+  res.json(booksOfList);
 });
 
 router.post("/create-reviews", async (req, res) => {
@@ -123,6 +133,48 @@ router.post("/create-reviews", async (req, res) => {
     await prisma.$disconnect();
   }
 });
+
+// Rota para obter o histórico de best-sellers e inserir no banco de dados
+// router.post("/best-sellers-history", async (req, res) => {
+//   const dataBooks = await fetchBestSellersHistory();
+//   dataBooks.results.forEach(async data => {
+//     try {
+//       if (data.isbns != []) {
+//         if (!await bookExists(data.isbns[0].isbn13, prisma)) {
+//           const book = await searchDataBooks(data.isbns[0].isbn13);
+//           if (book) {
+//             if (book.isbn != undefined && book.isbn != "") {
+//               await bookInsertion(book, prisma);
+//             }
+
+//           } else {
+//             res.status(404).json({ error: "Nenhum dado de best-sellers encontrado na resposta da API" });
+//           }
+//         }
+
+//       }
+
+//     } catch (error) {
+//       console.log("Erro ao formatar e inserir livro da lista: " + error);
+//     }
+//   });
+
+//   dataBooks.results.forEach(booksList => {
+//     try {
+//       if (booksList.isbns != []) {
+//         const booksListFormated = formatBooksListBS(booksList);
+//         booksOfListInsertion(booksListFormated, prisma);
+//       }
+//       else {
+//         console.log("Livro sem isbn válido.");
+//       }
+//     } catch (error) {
+//       console.log('Erro:', error);
+//     }
+//   });
+//   await prisma.$disconnect();
+// });
+
 
 // Rota para tratar requisições não encontradas (404)
 router.get('*', (req, res) => {

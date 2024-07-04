@@ -1,10 +1,10 @@
 export function listDataFormater(list) {
   try {
     let formatedList = {
-      nome: list.list_name_encoded,
+      nome: list.list_name,
       data_publicacao: dateFormater(list.newest_published_date),
       frequencia: list.updated,
-      // livros_da_lista: list.books
+      livros_da_lista: list.books
     };
     return formatedList;
   } catch (error) {

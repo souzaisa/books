@@ -63,7 +63,7 @@ export async function fetchAllIsbnsFromNytLists(listName) {
       listNames = [listName]
     } else {
       const listData = await fetchAllNytLists();
-      listNames = listData.map(list => list.list_name_encoded);
+      listNames = listData.map(list => list.list_name);
     }
 
     const isbns = [];
@@ -97,7 +97,7 @@ export async function fetchAllFromNytLists(listName) {
       listNames = [listName]
     } else {
       const listData = await fetchAllNytLists();
-      listNames = listData.map(list => list.list_name_encoded);
+      listNames = listData.map(list => list.list_name);
     }
 
     const registros = [];
@@ -108,7 +108,10 @@ export async function fetchAllFromNytLists(listName) {
         const data = await response.json();
         if (data && data.results && data.results.books) {
           data.results.books.forEach(book => {
-            registros.push({ livro_isbn: book.primary_isbn13, rank: book.rank, lista_nome: listName })
+            console.log(book);
+            if (book != null && book != undefined && book.primary_isbn13 != null && book.primary_isbn13 != undefined && book.primary_isbn13 != "") {
+              registros.push({ livro_isbn: book.primary_isbn13, rank: book.rank, lista_nome: listName });
+            }
           });
         }
       } catch (error) {

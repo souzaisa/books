@@ -5,7 +5,7 @@ export async function getBooksByISBN(req, res) {
   try {
     const isbns = await fetchAllIsbnsFromNytLists();
     const booksDetails = await Promise.all(isbns.map(async isbn => {
-      return await searchBook(isbn);
+      return await searchBook(isbn.isbn13);
     }));
     return booksDetails;
   } catch (error) {

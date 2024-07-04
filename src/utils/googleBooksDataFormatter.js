@@ -3,17 +3,19 @@ import { dateFormater } from '../utils/dataFormatter.js'
 export function bookDataFormater(book) {
   try {
     let formatedBook = {
-      isbn: book.volumeInfo.industryIdentifiers[0].identifier.trim(),
+      isbn: book.volumeInfo.industryIdentifiers[0].identifier,
       titulo: book.volumeInfo.title.trim(),
       autor: book.volumeInfo.authors.toString().trim(),
       categoria: book.volumeInfo.categories.toString().trim(),
       data_publicacao: dateFormater(book.volumeInfo.publishedDate),
       descricao: book.volumeInfo.description.trim() || null,
       num_paginas: book.volumeInfo.pageCount || null,
-      link_thumbnail: book.imageLinks ? book.imageLinks.thumbnail : null,
-      nota_media: book.volumeInfo.averageRating ? book.volumeInfo.averageRating : null,
+      link_thumbnail: book.volumeInfo.imageLinks.thumbnail || null,
+      nota_media: book.volumeInfo.averageRating,
     };
+
     return formatedBook;
+
   } catch (error) {
     console.log("Erro de formatação do livro: " + error);
   }
@@ -25,11 +27,10 @@ export function googleReviewDataFormater(review) {
     // Realiza a formatação dos dados da avaliação do Google Books
     let formatedReview = {
       isbn: review.isbn,
-      titulo: review.title,
       autor: review.authors.toString(),
-      // link_url_review: null,
-      // numero_review: parseInt(review.ratingsCount) || null,
-      sumario: review.reviews || null
+      sumario: review.reviews || null,
+      link_url_review: null,
+      numero_review: parseInt(review.ratingsCount) || null,
     };
     return formatedReview;
   } catch (error) {

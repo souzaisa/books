@@ -41,12 +41,13 @@ model livros_da_lista {
 }
 
 model review {
-  livro_isbn      String  @db.VarChar(13)
-  titulo          String  @db.VarChar(255)
-  autor           String  @db.VarChar(255)
+  livro_isbn      String    @db.VarChar(13)
+  autor           String    @db.VarChar(255)
+  data_publicacao DateTime? @db.Date
   sumario         String?
-  link_url_review String? @db.VarChar(255)
-  livro           livro   @relation(fields: [livro_isbn], references: [isbn], onDelete: NoAction, onUpdate: NoAction)
+  link_url_review String?   @db.VarChar(255)
+  numero_review   Int?
+  livro           livro     @relation(fields: [livro_isbn], references: [isbn], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([autor, livro_isbn])
 }
