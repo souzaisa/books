@@ -55,12 +55,18 @@ export async function fetchAllNytLists() {
 /**
  * Função para buscar todos os ISBNs-13 de todas as listas de Best Sellers da NYT sem duplicados.
  */
-export async function fetchAllIsbnsFromNytLists() {
+export async function fetchAllIsbnsFromNytLists(listName) {
   try {
-    const listData = await fetchAllNytLists();
-    const listNames = listData.map(list => list.list_name_encoded);
+    let listNames = []
 
-    const allIsbns = new Set();
+    if (listName) {
+      listNames = [listName]
+    } else {
+      const listData = await fetchAllNytLists();
+      listNames = listData.map(list => list.list_name);
+    }
+
+    const isbns = [];
     for (const listName of listNames) {
       const url = `${nytBaseUrl}/lists/current/${listName}.json?api-key=${nytApiKey}`;
       try {
@@ -68,12 +74,73 @@ export async function fetchAllIsbnsFromNytLists() {
         const data = await response.json();
         if (data && data.results && data.results.books) {
           data.results.books.forEach(book => {
-            book.isbns.forEach(isbn => allIsbns.add(isbn.isbn13)); // jogar para o data formater
+            isbns.push(book.primary_isbn13); // jogar para o data formater
           });
         }
       } catch (error) {
         console.error(`Erro ao buscar ISBNs para a lista ${listName}:`, error);
       }
+    }
+
+    return isbns;
+  } catch (error) {
+    console.error('Erro ao extrair ISBNs de todas as listas:', error);
+    throw error;
+  }
+}
+
+export async function fetchAllFromNytLists(listName) {
+  try {
+    let listNames = []
+
+    if (listName) {
+      listNames = [listName]
+    } else {
+      const listData = await fetchAllNytLists();
+      listNames = listData.map(list => list.list_name);
+    }
+
+    const registros = [];
+    for (const listName of listNames) {
+      const url = `${nytBaseUrl}/lists/current/${listName}.json?api-key=${nytApiKey}`;
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data && data.results && data.results.books) {
+          data.results.books.forEach(book => {
+            console.log(book);
+            if (book != null && book != undefined && book.primary_isbn13 != null && book.primary_isbn13 != undefined && book.primary_isbn13 != "") {
+              registros.push({ livro_isbn: book.primary_isbn13, rank: book.rank, lista_nome: listName });
+            }
+          });
+        }
+      } catch (error) {
+        console.error(`Erro ao buscar ISBNs para a lista ${listName}:`, error);
+      }
+    }
+
+    return registros; // Converter Set para Array antes de retornar
+  } catch (error) {
+    console.error('Erro ao extrair ISBNs de todas as listas:', error);
+    throw error;
+  }
+}
+
+
+export async function fetchBookByListName(listName) {
+  try {
+    const allIsbns = new Set();
+    const url = `${nytBaseUrl}/lists/current/${listName}.json?api-key=${nytApiKey}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data && data.results && data.results.books) {
+        data.results.books.forEach(book => {
+          book.isbns.forEach(isbn => allIsbns.add({ isbn: isbn.isbn13, rank: book.rank })); // jogar para o data formater
+        });
+      }
+    } catch (error) {
+      console.error(`Erro ao buscar ISBNs para a lista ${listName}:`, error);
     }
 
     return Array.from(allIsbns); // Converter Set para Array antes de retornar

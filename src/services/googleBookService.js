@@ -1,17 +1,18 @@
 import fetch from 'node-fetch';
 
+const API_KEY_GB = 'AIzaSyBL8ms47_xUZbStZDQJAt7dGpkeuGPe1aw';
 async function searchBooksBySubjects(subject) {
-  let startIndex = 0;
+  let startIndex = 500;
   let books = [];
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 60; i++) {
     try {
-      const response = await fetch('https://www.googleapis.com/books/v1/volumes?q=subject=' + subject + '&orderBy=relevance&printType=books&maxResults=40&startIndex=' + startIndex);
+      const response = await fetch('https://www.googleapis.com/books/v1/volumes?q=subject=' + subject + '&orderBy=relevance&printType=books&maxResults=40&startIndex=' + startIndex + '&key=' + API_KEY_GB);
       const responseJSON = await response.json();
       books.push(responseJSON);
-      startIndex = 40;
     } catch (erro) {
-      return erro.toString();
+      return erro;
     }
+    startIndex++;
   }
   return books;
 }
@@ -19,8 +20,23 @@ async function searchBooksBySubjects(subject) {
 export async function searchBook(ISBN) {
   const response = await fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:' + ISBN);
   const book = await response.json();
-  return book;
+  if (book && book.items && book.items.length > 0) {
+    return book.items[0]; // Acessa o primeiro item do array items
+  } else {
+    console.log("Dados incompletos ou vazios. Não é possível acessar volumeInfo.");
+  }
+
 }
+
+// export async function fetchBestSellersHistory() {
+//   const response = await fetch("https://api.nytimes.com/svc/books/v3/lists/best-sellers/history.json?api-key=");
+//   const data = await response.json();
+//   if (data) {
+//     return data;
+//   } else {
+//     console.log("Dados incompletos ou vazios");
+//   }
+// }
 
 export async function listBooks() {
   const subjects = ["action", "horror", "fantasy", "romance", "science fiction", "mistery", "suspense", "drama", "comedy", "poetry", "memories", "autobiography", "biography", "history", "essay", "literary criticism", "comics", "graphic novel", "children's books", "cookbook", "travel book", "self-help book", "business book", "self-improvement book", "war Book"];
@@ -35,22 +51,6 @@ export async function listBooks() {
   }
 }
 
-/**
- * Função para buscar detalhes dos livros na API do Google Books para um array de ISBNs.
- * @param {array} isbns - Array de ISBNs
- */
-export async function getBooksDetailsFromGoogleBooks(isbns) {
-  try {
-    const booksDetails = await Promise.all(isbns.map(async isbn => {
-      const book = await searchBook(isbn);
-      return book;
-    }));
-    return booksDetails;
-  } catch (error) {
-    console.error('Erro ao buscar detalhes dos livros na API do Google Books:', error);
-    throw error;
-  }
-}
 
 /**
  * Busca avaliações na API do Google Books por ISBNs
@@ -75,7 +75,8 @@ export async function fetchGoogleBookReviewsByIsbns(isbns) {
               authors: bookData.authors,
               averageRating: bookData.averageRating,
               ratingsCount: bookData.ratingsCount,
-              reviews: bookData.description
+              reviews: bookData.description,
+              publishedDate: bookData.publishedDate
             });
           } else {
             console.log(`Nenhuma avaliação encontrada para o ISBN: ${isbn}`);

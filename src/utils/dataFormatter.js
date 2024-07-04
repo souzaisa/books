@@ -1,29 +1,10 @@
-export function bookDataFormater(book) {
-  try {
-    let formatedBook = {
-      isbn: book.volumeInfo.industryIdentifiers[0].identifier,
-      titulo: book.volumeInfo.title,
-      autor: book.volumeInfo.authors.toString(),
-      categoria: book.volumeInfo.categories.toString(),
-      data_publicacao: dateFormater(book.volumeInfo.publishedDate),
-      descricao: book.volumeInfo.description || null,
-      num_paginas: book.volumeInfo.pageCount || null,
-      link_thumbnail: book.imageLinks ? book.imageLinks.thumbnail : null,
-      nota_media: book.averageRating ? parseFloat(book.averageRating) : null,
-    };
-    return formatedBook;
-  } catch (error) {
-    console.log("Erro de formatação do livro: " + error);
-  }
-}
-
 export function listDataFormater(list) {
   try {
     let formatedList = {
-      nome: list.title,
-      data_publicacao: dateFormater(list.publishDate),
-      data_avaliacao: dateFormater(list.rateDate),
-      livrosdalista: list.isbns
+      nome: list.list_name,
+      data_publicacao: dateFormater(list.newest_published_date),
+      frequencia: list.updated,
+      livros_da_lista: list.books
     };
     return formatedList;
   } catch (error) {
@@ -52,4 +33,43 @@ export function arrayFormater(array) {
     }
   });
   return booksList;
+}
+
+
+export function arrayFormater2(array) {
+  let booksList = [];
+  array.forEach(element => {
+    if (element) {
+      if (element.items) {
+        element.items.forEach(book => {
+          if (book) booksList.push(book);
+        });
+      }
+    }
+  });
+  return booksList;
+}
+
+export function arrayVerifier(array, attribute) {
+  if (!Array.isArray(array)) {
+    throw new Error("Input must be an array");
+  }
+  if (!attribute) {
+    throw new Error("Attribute must be defined");
+  }
+
+  let reduced = [];
+  array.forEach((item) => {
+    if (item && item.hasOwnProperty(attribute)) {
+      let duplicated = reduced.findIndex(redItem => redItem[attribute] === item[attribute]) > -1;
+      if (!duplicated) {
+        reduced.push(item);
+      }
+    }
+  });
+  return reduced;
+}
+
+export function sumArrays(array1, array2) {
+  return [...array1, ...array2];
 }

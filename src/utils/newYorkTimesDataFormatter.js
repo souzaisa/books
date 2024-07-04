@@ -1,0 +1,42 @@
+// Função para formatar dados de avaliação do New York Times
+export function nytReviewDataFormater(review) {
+  try {
+    // Realiza a formatação dos dados da avaliação do New York Times
+    let formatedReview = {
+      isbn: review.isbn13[0],
+      autor: review.book_author,
+      data_publicacao: dateFormater(review.publication_dt) || null,
+      sumario: review.sumary || null,
+      link_url_review: review.url || null,
+      numero_review: null // O número de avaliações será definido posteriormente
+    };
+    return formatedReview;
+  } catch (error) {
+    console.log("Erro de formatação do NYT review: " + error);
+  }
+}
+
+export function livrosDaListaDataFormater(livros) {
+  try {
+    return livros.map(livro => ({
+      lista_nome: listaNome,
+      rank: livro.rank,
+      livro_isbn: livro.primary_isbn13,
+    }));
+  } catch (error) {
+    console.log("Erro de formatação dos dados de livros da lista: " + error);
+  }
+}
+
+export async function formatBooksListBS(booksList) {
+  try {
+    return {
+      lista_nome: booksList.ranks_history[0].list_name,
+      rank: booksList.ranks_history[0].rank,
+      livro_isbn: booksList.isbns[0].isbn13,
+    }
+
+  } catch (error) {
+    console.log("Erro de formatação dos dados de livros da lista: " + error);
+  }
+}

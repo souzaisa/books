@@ -31,8 +31,8 @@ CREATE TABLE Lista (
     data_avaliacao DATE
 );
 
--- Cria a Tabela Livrosdalista para representar a relação entre Livro e Lista.
-CREATE TABLE Livrosdalista (
+-- Cria a Tabela livros_da_lista para representar a relação entre Livro e Lista.
+CREATE TABLE livros_da_lista (
     lista_nome VARCHAR(255) NOT NULL,
     livro_isbn VARCHAR(13) NOT NULL,
     rank INT CHECK (rank BETWEEN 1 AND 15),
