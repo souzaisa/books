@@ -6,7 +6,8 @@ import { arrayFormater, arrayFormater2, arrayVerifier, sumArrays } from '../util
 
 export async function dataBooks() {
   const books = await listBooks();
-  const booksFormated = books.map(book => bookDataFormater(book));
+  const googleList = arrayFormater(books);
+  const booksFormated = googleList.map(book => bookDataFormater(book));
   const booksVerifier = arrayVerifier(booksFormated, 'isbn');
 
   return booksVerifier;
